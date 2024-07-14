@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals/model/meal.dart';
@@ -36,17 +38,29 @@ class MealDetailsScreen extends ConsumerWidget {
                 ),
               );
             },
-            icon: Icon(isFavourite ? Icons.star : Icons.star_border),
-          )
+            icon: AnimatedSwitcher(
+              duration: const Duration(microseconds: 300),
+              transitionBuilder: (child, animation) => RotationTransition(
+                turns: Tween<double>(begin: 0.8, end: 1).animate(animation),
+                child: child,
+              ),
+              switchInCurve: Curves.bounceIn,
+              switchOutCurve: Curves.bounceInOut,
+              child: Icon(isFavourite ? Icons.star : Icons.star_border),
+            ),
+          ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(children: [
-          Image.network(
-            meal.imageUrl,
-            height: 300,
-            width: double.infinity,
-            fit: BoxFit.cover,
+          Hero(
+            tag: meal.id,
+            child: Image.network(
+              meal.imageUrl,
+              height: 300,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
           ),
           SizedBox(
             height: 14,
