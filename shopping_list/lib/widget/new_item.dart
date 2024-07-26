@@ -5,6 +5,8 @@ import 'package:shopping_list/model/category.dart';
 import 'package:http/http.dart' as http;
 import "dart:convert";
 
+import 'package:shopping_list/model/grocery_item.dart';
+
 class NewItem extends StatefulWidget {
   const NewItem({Key? key}) : super(key: key);
 
@@ -16,6 +18,7 @@ class _NewItemState extends State<NewItem> {
   var _formkey = GlobalKey<FormState>();
   var _enterdName = " ";
   var enteredQuantity = 1;
+  var isSending = false;
 
   var _selectedCategory = categories[Categories.vegetables]!;
 
@@ -31,10 +34,20 @@ class _NewItemState extends State<NewItem> {
     });
     _formkey.currentState!.validate();
     _formkey.currentState!.save();
+    setState(() {
+      isSending = true;
+    });
+
     var response = await http.post(url, headers: header, body: body);
+
+    final Map<String, dynamic> resData = json.decode(response.body);
     if (!context.mounted) return;
 
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(GroceryItem(
+        id: resData['name'],
+        name: _enterdName,
+        quantity: enteredQuantity,
+        category: _selectedCategory));
   }
 
   @override
@@ -136,8 +149,14 @@ class _NewItemState extends State<NewItem> {
                     child: const Text("Reset"),
                   ),
                   ElevatedButton(
-                    onPressed: _saveItem,
-                    child: const Text("Add Item"),
+                    onPressed: isSending ? null : _saveItem,
+                    child: isSending
+                        ? const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(),
+                          )
+                        : const Text("Add Item"),
                   )
                 ],
               ),
